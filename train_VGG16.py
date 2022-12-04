@@ -30,13 +30,13 @@ transform = transforms.Compose([transforms.CenterCrop((32, 32)),
 
 ## get the dataset from torchvision
 svhn_train_set = torchvision.datasets.SVHN(root=DIR_dataset, split='train', download=True, transform=transform)
-# svhn_extra_set = torchvision.datasets.SVHN(root=DIR_dataset, split='extra', download=True, transform=transform)
-# cifar_train_set = torchvision.datasets.CIFAR10(root=DIR_dataset, train=True, download=True, transform=transform)
-#
-# # combine train and extra as train dataset
-# combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, cifar_train_set])
+svhn_extra_set = torchvision.datasets.SVHN(root=DIR_dataset, split='extra', download=True, transform=transform)
+cifar_train_set = torchvision.datasets.CIFAR10(root=DIR_dataset, train=True, download=True, transform=transform)
 
-combined_dataset = svhn_train_set
+# combine train and extra as train dataset
+combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, cifar_train_set])
+
+# combined_dataset = svhn_train_set
 
 
 ## split the train dataset into train and validation dataset
@@ -53,7 +53,7 @@ print("Length of validation dataset: ", len(val_dataset))
 
 
 ## get the dataloader
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 NUM_WORKERS = 2
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
@@ -107,11 +107,10 @@ optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMEN
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
-NUM_EPOCHS = 2
+NUM_EPOCHS = 20
 
 # define the best accuracy and best model weights to save
 best_acc = 0.0
-best_model_wts = None
 
 # define the lists to save the loss and accuracy for plotting the graph later
 train_loss_list = torch.zeros(NUM_EPOCHS)
@@ -230,6 +229,10 @@ for epoch in range(NUM_EPOCHS):
 # save the training history to pandas dataframe
 train_history = pd.DataFrame({'train_loss': train_loss_list, 'train_acc': train_acc_list, 'val_loss': val_loss_list, 'val_acc': val_acc_list})
 train_history.to_csv("train_history.csv", index=False)
+
+
+
+
 
 
 
