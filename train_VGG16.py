@@ -8,6 +8,7 @@ import numpy as np
 # import os
 # import cv2
 import copy
+import pandas as pd
 
 
 
@@ -113,10 +114,10 @@ best_acc = 0.0
 best_model_wts = None
 
 # define the lists to save the loss and accuracy for plotting the graph later
-train_loss_list = []
-train_acc_list = []
-val_loss_list = []
-val_acc_list = []
+train_loss_list = torch.zeros(NUM_EPOCHS)
+train_acc_list = torch.zeros(NUM_EPOCHS)
+val_loss_list = torch.zeros(NUM_EPOCHS)
+val_acc_list = torch.zeros(NUM_EPOCHS)
 
 
 ## ################ Training ################
@@ -206,11 +207,12 @@ for epoch in range(NUM_EPOCHS):
     epoch_val_loss = batch_val_loss / len(val_dataset)
     epoch_val_acc = batch_val_acc.double() / len(val_dataset)
 
-    # append the loss and accuracy to the list as numpy array
-    train_loss_list.append(epoch_train_loss)
-    train_acc_list.append(epoch_train_acc)
-    val_loss_list.append(epoch_val_loss)
-    val_acc_list.append(epoch_val_acc)
+    # add the loss and accuracy to the list
+    train_loss_list[epoch] = epoch_train_loss
+    train_acc_list[epoch] = epoch_train_acc
+    val_loss_list[epoch] = epoch_val_loss
+    val_acc_list[epoch] = epoch_val_acc
+
 
 
 
@@ -225,18 +227,9 @@ for epoch in range(NUM_EPOCHS):
         print("Saved the best model")
 
 
-# save the lists to files
-    with open('train_loss_list.txt', 'w') as f:
-        for item in train_loss_list:
-            f.write("%s\n" % item)
-    with open('train_acc_list.txt', 'w') as f:
-        for item in train_acc_list:
-            f.write("%s\n" % item)
+# save the training history to pandas dataframe
+train_history = pd.DataFrame({'train_loss': train_loss_list, 'train_acc': train_acc_list, 'val_loss': val_loss_list, 'val_acc': val_acc_list})
+train_history.to_csv(f"{DIR_output}/train_history.csv", index=False)
 
-    with open('val_loss_list.txt', 'w') as f:
-        for item in val_loss_list:
-            f.write("%s\n" % item)
 
-    with open('val_acc_list.txt', 'w') as f:
-        for item in val_acc_list:
-            f.write("%s\n" % item)
+
