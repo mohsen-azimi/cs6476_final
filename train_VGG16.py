@@ -14,8 +14,8 @@ import pandas as pd
 
 ## Define the folders to load the dataset/save the model
 DIR_dataset = './dataset'
-DIR_model = './model'
-DIR_output = './output'
+# DIR_model = './model'
+# DIR_output = './output'
 
 ## get the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -223,13 +223,13 @@ for epoch in range(NUM_EPOCHS):
     if epoch_val_acc > best_acc:
         best_acc = epoch_val_acc
         best_model_wts = copy.deepcopy(model.state_dict())
-        torch.save(model, f"{DIR_model}/best_model.pt")
+        torch.save(model, f"best_model.pt")
         print("Saved the best model")
 
 
 # save the training history to pandas dataframe
 train_history = pd.DataFrame({'train_loss': train_loss_list, 'train_acc': train_acc_list, 'val_loss': val_loss_list, 'val_acc': val_acc_list})
-train_history.to_csv(f"{DIR_output}/train_history.csv", index=False)
+train_history.to_csv("train_history.csv", index=False)
 
 
 
