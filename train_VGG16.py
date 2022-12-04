@@ -212,21 +212,7 @@ for epoch in range(NUM_EPOCHS):
     val_loss_list.append(epoch_val_loss)
     val_acc_list.append(epoch_val_acc)
 
-    # save the lists to files
-    with open('train_loss_list.txt', 'w') as f:
-        for item in train_loss_list:
-            f.write("%s\n" % item)
-    with open('train_acc_list.txt', 'w') as f:
-        for item in train_acc_list:
-            f.write("%s\n" % item)
 
-    with open('val_loss_list.txt', 'w') as f:
-        for item in val_loss_list:
-            f.write("%s\n" % item)
-
-    with open('val_acc_list.txt', 'w') as f:
-        for item in val_acc_list:
-            f.write("%s\n" % item)
 
 
 
@@ -244,8 +230,21 @@ for epoch in range(NUM_EPOCHS):
         print("Saved the best model")
 
 
+# save the lists to files
+    with open('train_loss_list.txt', 'w') as f:
+        for item in train_loss_list:
+            f.write("%s\n" % item)
+    with open('train_acc_list.txt', 'w') as f:
+        for item in train_acc_list:
+            f.write("%s\n" % item)
 
+    with open('val_loss_list.txt', 'w') as f:
+        for item in val_loss_list:
+            f.write("%s\n" % item)
 
+    with open('val_acc_list.txt', 'w') as f:
+        for item in val_acc_list:
+            f.write("%s\n" % item)
 
 
 
