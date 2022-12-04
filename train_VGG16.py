@@ -207,15 +207,10 @@ for epoch in range(NUM_EPOCHS):
     epoch_val_acc = batch_val_acc.double() / len(val_dataset)
 
     # append the loss and accuracy to the list
-    train_loss_list.append(epoch_train_loss)
+    train_loss_list.append(epoch_train_loss.cpu().numpy())
     train_acc_list.append(epoch_train_acc)
     val_loss_list.append(epoch_val_loss)
     val_acc_list.append(epoch_val_acc)
-
-
-
-
-
 
 
 
@@ -245,10 +240,3 @@ for epoch in range(NUM_EPOCHS):
     with open('val_acc_list.txt', 'w') as f:
         for item in val_acc_list:
             f.write("%s\n" % item)
-
-
-
-
-
-
-
