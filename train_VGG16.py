@@ -168,7 +168,7 @@ for epoch in range(NUM_EPOCHS):
 
         # print the loss and accuracy every 100 batches
         if batch % 100 == 99:
-            print(f"Epoch: {epoch}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
+            print(f"Epoch: {epoch+1}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
 
         # del the variables to save memory
         del inputs, labels, outputs, preds, loss
@@ -206,8 +206,8 @@ for epoch in range(NUM_EPOCHS):
     epoch_val_loss = batch_val_loss / len(val_dataset)
     epoch_val_acc = batch_val_acc.double() / len(val_dataset)
 
-    # append the loss and accuracy to the list
-    train_loss_list.append(epoch_train_loss.cpu().numpy())
+    # append the loss and accuracy to the list as numpy array
+    train_loss_list.append(epoch_train_loss)
     train_acc_list.append(epoch_train_acc)
     val_loss_list.append(epoch_val_loss)
     val_acc_list.append(epoch_val_acc)
@@ -215,13 +215,13 @@ for epoch in range(NUM_EPOCHS):
 
 
     # print the loss and accuracy for each epoch
-    print(f"Epoch: {epoch}, Train Loss: {epoch_train_loss:.4f}, Train Accuracy: {epoch_train_acc:.4f}, Val Loss: {epoch_val_loss:.4f}, Val Accuracy: {epoch_val_acc:.4f}")
+    print(f"Epoch: {epoch+1}, Train Loss: {epoch_train_loss:.4f}, Train Accuracy: {epoch_train_acc:.4f}, Val Loss: {epoch_val_loss:.4f}, Val Accuracy: {epoch_val_acc:.4f}")
 
     # save the best model
     if epoch_val_acc > best_acc:
         best_acc = epoch_val_acc
         best_model_wts = copy.deepcopy(model.state_dict())
-        torch.save(model, "best_model.pt")
+        torch.save(model, f"{DIR_model}/best_model.pt")
         print("Saved the best model")
 
 
