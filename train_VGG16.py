@@ -62,7 +62,7 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE, shu
 
 ###################### Model Loading ######################
 ## load VGG16 model from torchvision
-PRE_TRAINED = True
+PRE_TRAINED = False
 
 if PRE_TRAINED:
     model = torchvision.models.vgg16(pretrained=True)
