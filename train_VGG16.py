@@ -3,10 +3,12 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
-# import numpy as np
+import numpy as np
 # import matplotlib.pyplot as plt
 # import os
 # import cv2
+import copy
+
 
 
 ## Define the folders to load the dataset/save the model
@@ -27,12 +29,13 @@ transform = transforms.Compose([transforms.CenterCrop((32, 32)),
 
 ## get the dataset from torchvision
 svhn_train_set = torchvision.datasets.SVHN(root=DIR_dataset, split='train', download=True, transform=transform)
-svhn_extra_set = torchvision.datasets.SVHN(root=DIR_dataset, split='extra', download=True, transform=transform)
-cifar_train_set = torchvision.datasets.CIFAR10(root=DIR_dataset, train=True, download=True, transform=transform)
+# svhn_extra_set = torchvision.datasets.SVHN(root=DIR_dataset, split='extra', download=True, transform=transform)
+# cifar_train_set = torchvision.datasets.CIFAR10(root=DIR_dataset, train=True, download=True, transform=transform)
+#
+# # combine train and extra as train dataset
+# combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, cifar_train_set])
 
-# combine train and extra as train dataset
-combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, cifar_train_set])
-
+combined_dataset = svhn_train_set
 
 
 ## split the train dataset into train and validation dataset
@@ -56,8 +59,6 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
 
 
-# ## get the classes
-# classes = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 ###################### Model Loading ######################
 ## load VGG16 model from torchvision
 PRE_TRAINED = True
@@ -105,7 +106,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMEN
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
-NUM_EPOCHS = 20
+NUM_EPOCHS = 2
 
 # define the best accuracy and best model weights to save
 best_acc = 0.0
@@ -120,15 +121,17 @@ val_acc_list = []
 
 ## ################ Training ################
 for epoch in range(NUM_EPOCHS):
-    print(f"Epoch {epoch+1}/{NUM_EPOCHS}")
     print("---------------------")
 
     # # set the model to train mode
     # model.train()
 
-    # define the running loss and running corrects
-    running_loss = 0.0
-    running_corrects = 0
+    # define train and val loss and accuracy
+    batch_train_loss = 0.0
+    batch_train_acc = 0.0
+    batch_val_loss = 0.0
+    batch_val_acc = 0.0
+
 
     # iterate over the data
     for batch, data_sample in enumerate(train_loader, 0):
@@ -159,16 +162,77 @@ for epoch in range(NUM_EPOCHS):
 
         # statistics for loss and accuracy
         # [[[[[[[[[[[[[[[[[
-        running_loss += loss.item() * inputs.size(0)
-        running_corrects += torch.sum(preds == labels.data)
+        batch_train_loss += loss.item() # * inputs.size(0)
+        batch_train_acc += torch.sum(preds == labels.data)
+
 
         # print the loss and accuracy every 100 batches
         if batch % 100 == 99:
-            print(f"Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
+            print(f"Epoch: {epoch}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
+
+        # del the variables to save memory
+        del inputs, labels, outputs, preds, loss
+        torch.cuda.empty_cache()
 
     # calculate the epoch loss and accuracy
-    epoch_loss = running_loss / len(train_dataset)
-    epoch_acc = running_corrects.double() / len(train_dataset)
+    epoch_train_loss = batch_train_loss / len(train_dataset)
+    epoch_train_acc = batch_train_acc.double() / len(train_dataset)
+
+    # calculate the validation loss and accuracy
+    model.eval()
+    with torch.no_grad():
+        for batch, data_sample in enumerate(val_loader, 0):
+            # first, get the inputs and labels and send them to device(GPU)
+            inputs, labels = data_sample
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            # forward
+            optimizer.zero_grad()
+            outputs = model(inputs)
+
+            _, preds = torch.max(outputs.data, 1)
+
+            loss = criterion(outputs, labels)
+
+            # statistics for loss and accuracy
+            batch_val_loss += loss.item() # * inputs.size(0)
+            batch_val_acc += torch.sum(preds == labels.data)
+
+            # del the variables to save memory
+            del inputs, labels, outputs, preds, loss
+            torch.cuda.empty_cache()
+
+    epoch_val_loss = batch_val_loss / len(val_dataset)
+    epoch_val_acc = batch_val_acc.double() / len(val_dataset)
+
+    # append the loss and accuracy to the list
+    train_loss_list.append(epoch_train_loss)
+    train_acc_list.append(epoch_train_acc)
+    val_loss_list.append(epoch_val_loss)
+    val_acc_list.append(epoch_val_acc)
+
+    # save the lists to txt files
+    np.savetxt('train_loss_list.txt', train_loss_list)
+    np.savetxt('train_acc_list.txt', train_acc_list)
+    np.savetxt('val_loss_list.txt', val_loss_list)
+    np.savetxt('val_acc_list.txt', val_acc_list)
+
+
+
+
+    # print the loss and accuracy for each epoch
+    print(f"Epoch: {epoch}, Train Loss: {epoch_train_loss:.4f}, Train Accuracy: {epoch_train_acc:.4f}, Val Loss: {epoch_val_loss:.4f}, Val Accuracy: {epoch_val_acc:.4f}")
+
+    # save the best model
+    if epoch_val_acc > best_acc:
+        best_acc = epoch_val_acc
+        best_model_wts = copy.deepcopy(model.state_dict())
+        torch.save(model, "best_model.pt")
+        print("Saved the best model")
+
+
+
 
 
 
