@@ -108,7 +108,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMEN
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
-NUM_EPOCHS = 20
+NUM_EPOCHS = 30
 
 # define the best accuracy and best model weights to save
 best_acc = 0.0
