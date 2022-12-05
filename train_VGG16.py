@@ -26,7 +26,6 @@ print("Line 19: Device: ", device)
 ## define the transform
  #reference: https://pytorch.org/vision/stable/auto_examples/plot_transforms.html#sphx-glr-auto-examples-plot-transforms-py
 transform = transforms.Compose([transforms.ColorJitter(hue=.05, saturation=.05),
-    transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(20, resample=PIL.Image.BILINEAR),
     transforms.RandAugment(),
     transforms.AutoAugment(transforms.AutoAugmentPolicy.SVHN),
@@ -40,10 +39,9 @@ transform = transforms.Compose([transforms.ColorJitter(hue=.05, saturation=.05),
 svhn_train_set = torchvision.datasets.SVHN(root=DIR_dataset, split='train', download=True, transform=transform)
 svhn_extra_set = torchvision.datasets.SVHN(root=DIR_dataset, split='extra', download=True, transform=transform)
 svhn_test_set = torchvision.datasets.SVHN(root=DIR_dataset, split='test', download=True, transform=transform)
-cifar_train_set = torchvision.datasets.CIFAR10(root=DIR_dataset, train=True, download=True, transform=transform)
 
 # combine train and extra as train dataset
-combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, svhn_test_set, cifar_train_set])
+combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, svhn_test_set])
 
 
 
