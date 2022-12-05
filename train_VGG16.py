@@ -9,6 +9,7 @@ import numpy as np
 # import cv2
 import copy
 import pandas as pd
+import PIL
 
 
 
@@ -23,7 +24,13 @@ print("Line 19: Device: ", device)
 
 ## ################ Datast Loading ################
 ## define the transform
-transform = transforms.Compose([transforms.Resize((32, 32)),
+transform = transforms.Compose([transforms.ColorJitter(hue=.05, saturation=.05),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(20, resample=PIL.Image.BILINEAR),
+    transforms.RandAugment(),
+    transforms.AutoAugment(transforms.AutoAugmentPolicy.SVHN),
+
+    transforms.Resize((32, 32)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
@@ -31,12 +38,12 @@ transform = transforms.Compose([transforms.Resize((32, 32)),
 ## get the dataset from torchvision
 svhn_train_set = torchvision.datasets.SVHN(root=DIR_dataset, split='train', download=True, transform=transform)
 svhn_extra_set = torchvision.datasets.SVHN(root=DIR_dataset, split='extra', download=True, transform=transform)
+svhn_test_set = torchvision.datasets.SVHN(root=DIR_dataset, split='test', download=True, transform=transform)
 cifar_train_set = torchvision.datasets.CIFAR10(root=DIR_dataset, train=True, download=True, transform=transform)
 
 # combine train and extra as train dataset
-combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, cifar_train_set])
+combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, svhn_test_set, cifar_train_set])
 
-# combined_dataset = svhn_train_set
 
 
 ## split the train dataset into train and validation dataset
