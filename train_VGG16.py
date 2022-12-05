@@ -116,7 +116,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMEN
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
-NUM_EPOCHS = 30
+NUM_EPOCHS = 25
 
 # define the best accuracy and best model weights to save
 best_acc = 0.0
@@ -224,6 +224,8 @@ for epoch in range(NUM_EPOCHS):
 
 
 
+
+
     # print the loss and accuracy for each epoch
     print(f"Epoch: {epoch+1}, Train Loss: {epoch_train_loss:.4f}, Train Accuracy: {epoch_train_acc:.4f}, Val Loss: {epoch_val_loss:.4f}, Val Accuracy: {epoch_val_acc:.4f}")
 
@@ -234,6 +236,13 @@ for epoch in range(NUM_EPOCHS):
 
         # save the model
         torch.save(model.state_dict(), f'{file_name}_state_dict.pt')
+
+    # early stopping if the validation loss is not decreasing for 5 epochs
+    if epoch > 5:
+        if val_loss_list[epoch] > val_loss_list[epoch - 1] > val_loss_list[epoch - 2] > val_loss_list[epoch - 3] > \
+                val_loss_list[epoch - 4] > val_loss_list[epoch - 5]:
+            print("Early stopping at epoch: ", epoch)
+            break
 
 
 # save the training history to pandas dataframe
