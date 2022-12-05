@@ -14,16 +14,15 @@ import pandas as pd
 
 ## Define the folders to load the dataset/save the model
 DIR_dataset = './dataset'
-# DIR_model = './model'
-# DIR_output = './output'
+
 
 ## get the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Line 19: Device: ", device)
+print("Device: ", device)
 
 ## ################ Datast Loading ################
 ## define the transform
-transform = transforms.Compose([transforms.Resize((32, 32)),
+transform = transforms.Compose([transforms.CenterCrop((32, 32)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
@@ -88,7 +87,6 @@ features.extend([torch.nn.Linear(IN_FEATURES, NUM_CLASSES)])
 
 # put all the layers together
 model.classifier = torch.nn.Sequential(*features)  # just replaced the last layer to 11 classes
-# model.classifier[6] = torch.nn.Sequential(torch.nn.Linear(4096, NUM_CLASSES))
 
 # print the model
 print(model)
@@ -238,3 +236,4 @@ train_history.to_csv("train_history.csv", index=False)
 
 
 
+## ################ Testing ################
