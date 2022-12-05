@@ -24,6 +24,7 @@ print("Line 19: Device: ", device)
 
 ## ################ Datast Loading ################
 ## define the transform
+ #reference: https://pytorch.org/vision/stable/auto_examples/plot_transforms.html#sphx-glr-auto-examples-plot-transforms-py
 transform = transforms.Compose([transforms.ColorJitter(hue=.05, saturation=.05),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(20, resample=PIL.Image.BILINEAR),
