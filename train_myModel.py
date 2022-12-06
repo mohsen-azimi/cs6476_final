@@ -60,7 +60,7 @@ print("Length of validation dataset: ", len(val_dataset))
 
 
 ## get the dataloader
-BATCH_SIZE = 1024
+BATCH_SIZE = 128
 NUM_WORKERS = 2
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
@@ -154,7 +154,7 @@ for epoch in range(NUM_EPOCHS):
 
 
         # print the loss and accuracy every 100 batches
-        if batch % 1000 == 999:
+        if batch % 100 == 99:
             print(f"Epoch: {epoch+1}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
 
         # del the variables to save memory
