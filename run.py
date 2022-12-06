@@ -59,21 +59,21 @@ model_arch = 'vgg16'
 
 if model_arch == 'MyModel':
     model = MyModel()
-    model.load_state_dict(torch.load('saved_models/junk_SVHN.pt'))
+    model.load_state_dict(torch.load('saved_models/my_model.pt'))
     model.to(device)
     model.eval()
     print(f"{model_arch} is loaded successfully!")
 
 else:
-    # model = torchvision.models.vgg16(pretrained=False)
+    model = torchvision.models.vgg16(pretrained=False)
     #
-    # IN_FEATURES = model.classifier[6].in_features  # get the number of features in the last layer
-    # features = list(model.classifier.children())[:-1]
-    # features.extend([torch.nn.Linear(IN_FEATURES, 11)])
-    # model.classifier = torch.nn.Sequential(*features)  # just replaced the last layer to 11 classes
+    IN_FEATURES = model.classifier[6].in_features  # get the number of features in the last layer
+    features = list(model.classifier.children())[:-1]
+    features.extend([torch.nn.Linear(IN_FEATURES, 11)])
+    model.classifier = torch.nn.Sequential(*features)  # just replaced the last layer to 11 classes
 
-    # model.load_state_dict(torch.load('saved_models/best_model_vgg16_from_scratch.pt', device))
-    model = torch.load('saved_models/best_model_vgg16_from_scratch.pt')  # entire model
+    model.load_state_dict(torch.load('saved_models/vgg16_scratch_state_dict.pt', device)) # load the best model
+    # model = torch.load('saved_models/best_model_vgg16_from_scratch.pt')  # entire model
     model.to(device)
     model.eval()
     print(f"{model_arch} is loaded successfully!")
@@ -85,10 +85,10 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 
-def run_detection_and_classification(image):
+def run_detection_and_classification(image, filename):
     print("run_detection_and_classification() is called!")
     # get the roi using MSER
-    roi_list = mser(image)
+    roi_list = mser(image, filename)
     print("Total ROIs: ", len(roi_list))
 
     # loop over the regions
@@ -128,7 +128,7 @@ def run_detection_and_classification(image):
             plt.imshow(imgg)
             plt.axis('off')
             # save the image
-            plt.savefig(f'smer_cropped_{len(best_roi_list)}.png', bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{filename}_smer_cropped_{len(best_roi_list)}.png', bbox_inches='tight', pad_inches=0)
             plt.show()
 
             croped_images.append(transform(torchvision.transforms.functional.to_pil_image(cropped_image)))
@@ -248,6 +248,13 @@ def run_detection_and_classification(image):
                         final_scores = final_scores[label.ravel() == 1]
                         final_labels = final_labels[label.ravel() == 1]
 
+            for score in final_scores:
+                if score < 0.5:
+                    # remove the bbox
+                    final_bboxes = np.delete(final_bboxes, np.where(final_scores == score), axis=0)
+                    final_scores = np.delete(final_scores, np.where(final_scores == score), axis=0)
+                    final_labels = np.delete(final_labels, np.where(final_scores == score), axis=0)
+
             # [[[[
             x_centers = [(final_bboxes[idx][0] + final_bboxes[idx][2]) / 2 for idx in range(len(final_bboxes))]
             digit_order = np.argsort(x_centers)
@@ -284,54 +291,92 @@ def run_detection_and_classification(image):
 if __name__ == '__main__':
     print("Running main")
     original_image = cv2.imread('test_image.png')
-
-    # 1. Original image
     image = np.copy(original_image)
-    run_detection_and_classification(image)  # detect and classify the numbers in the image
-    cv2.imwrite('output_original.png', image)  # save the image with bounding boxes
-    #
-    #
+
+    # # 1. Original image
+    filename = 'original'
+    print(f"------------\n filename: {filename} \n")
+    image = np.copy(original_image)
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    # #
+    # #
     # # # 2. Change brightness
-    # del image
-    # image = np.copy(original_image)
-    # image = (image * 0.9).clip(0, 255).astype(np.uint8)
-    # run_detection_and_classification(image)  # detect and classify the numbers in the image
-    # cv2.imwrite('output_brightness.png', image)  # save the image with bounding boxes
+    del image
+    filename = 'brightness'
+    image = np.copy(original_image)
+    image = (image * 0.7).clip(0, 255).astype(np.uint8)
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
     # #
     # #
     # # # 3. add noise
-    # del image
-    # image = np.copy(original_image) + np.random.normal(0, 10, original_image.shape).astype(np.uint8) # add noise
-    # image = np.clip(image, 0, 255).astype(np.uint8)
-    # run_detection_and_classification(image)  # detect and classify the numbers in the image
-    # cv2.imwrite('output_noise.png', image)  # save the image with bounding boxes
+    del image
+    filename = 'noise_5'
+    image = np.copy(original_image) + np.random.normal(0, 5, original_image.shape).astype(np.uint8) # add noise
+    image = np.clip(image, 0, 255).astype(np.uint8)
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
     # #
     # #
+    del image
+    filename = 'noise_10'
+    image = np.copy(original_image) + np.random.normal(0, 10, original_image.shape).astype(np.uint8) # add noise
+    image = np.clip(image, 0, 255).astype(np.uint8)
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    # #
+
     # # # 4. scale  image
-    # del image
-    # image = np.copy(original_image)
-    # image = cv2.resize(image, (0, 0), fx=1.3, fy=1.3)
-    # run_detection_and_classification(image)  # detect and classify the numbers in the image
-    # cv2.imwrite('output_scale.png', image)  # save the image with bounding boxes
-    # #
-    # #
-    # #
-    # # # 5. rotate image
-    # # del image
-    # # image = np.copy(original_image)
-    # # image = cv2.rotate(image, cv2.ROTATE_180)
-    # # run_detection_and_classification(image)  # detect and classify the numbers in the image
-    # # cv2.imwrite('output_rotate.png', image)  # save the image with bounding boxes
+    del image
+    filename = 'scale'
+    image = np.copy(original_image)
+    image = cv2.resize(image, (0, 0), fx=1.4, fy=1.4)
+    # center-crop the image to the original size
+    h_o, w_o, _ = original_image.shape
+    h, w, _ = image.shape
+    image = image[int((h - h_o) / 2):int((h - h_o) / 2) + h_o, int((w - w_o) / 2):int((w - w_o) / 2) + w_o]
+
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
     # # #
+    # # #
+    # # #
+    # # 5. rotate image 20 degrees
+    del image
+    filename = 'rotate_20'
+    image = np.copy(original_image)
+    from scipy import ndimage
+    image = ndimage.rotate(image, 20)
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    # # # #
+
+    # # 5. rotate image 20 degrees
+    # # # #
     # # # 6. move location
-    # del image
-    # image = np.copy(original_image)
-    # image = cv2.warpAffine(image, np.float32([[1, 0, 10], [0, 1, 10]]), (image.shape[1], image.shape[0]))
-    # run_detection_and_classification(image)  # detect and classify the numbers in the image
-    # cv2.imwrite('output_move.png', image)  # save the image with bounding boxes
-    # #
-    # #
-    # # # load video
-    # # # cap = cv2.VideoCapture('test_video.mp4')
-    # #
-    # #
+    del image
+    filename = 'move'
+    image = np.copy(original_image)
+    image = cv2.warpAffine(image, np.float32([[1, 0, 200], [0, 1, 200]]), (image.shape[1], image.shape[0]))
+    cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+    run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
+    cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    # # #
+    # # #
+    # # # # load video
+    # # # # cap = cv2.VideoCapture('test_video.mp4')
+    # # #
+    # # #

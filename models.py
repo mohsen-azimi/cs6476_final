@@ -1,104 +1,92 @@
-import torch
-import torchvision
-import torchvision.transforms as transforms
-import numpy as np
-# import matplotlib.pyplot as plt
-# import os
-# import cv2
-import copy
-# import pandas as pd
+
 import torch.nn as nn
 
-
-# [[[[[[[[[[[[[[[[[
 
 class MyModel(nn.Module):
 
     def __init__(self):
         super(MyModel, self).__init__()
 
-        self._hidden1 = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=48, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=48),
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Dropout(0.2)
-        )
-        self._hidden2 = nn.Sequential(
-            nn.Conv2d(in_channels=48, out_channels=64, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
-            nn.Dropout(0.2)
-        )
-        self._hidden3 = nn.Sequential(
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
-            nn.Dropout(0.2)
-        )
-        self._hidden4 = nn.Sequential(
-            nn.Conv2d(in_channels=128, out_channels=160, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=160),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
-            nn.Dropout(0.2)
-        )
-        self._hidden5 = nn.Sequential(
-            nn.Conv2d(in_channels=160, out_channels=192, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=192),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
-            nn.Dropout(0.2)
-        )
-        self._hidden6 = nn.Sequential(
-            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=192),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
-            nn.Dropout(0.2)
-        )
-        self._hidden7 = nn.Sequential(
-            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=192),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
-            nn.Dropout(0.2)
-        )
-        self._hidden8 = nn.Sequential(
-            nn.Conv2d(in_channels=192, out_channels=192, kernel_size=5, padding=2),
-            nn.BatchNorm2d(num_features=192),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
-            nn.Dropout(0.2)
-        )
-        self._hidden9 = nn.Sequential(
-            nn.Linear(192 * 3 * 3, 3072),
-            nn.ReLU()
-        )
-        self._hidden10 = nn.Sequential(
-            nn.Linear(3072, 3072),
-            nn.ReLU()
         )
 
-        self._output = nn.Sequential(nn.Linear(3072, 11))
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2)
+        )
+
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2)
+        )
+
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2)
+        )
+
+        self.conv5 = nn.Sequential(
+            nn.Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2)
+        )
+
+        self.conv6 = nn.Sequential(
+            nn.Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(1024),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2)
+        )
+
+        self.conv7 = nn.Sequential(
+            nn.Conv2d(1024, 2048, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(2048),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2)
+        )
+
+        self.fc1 = nn.Sequential(
+            nn.Linear(2048 * 2 * 2, 1024),
+            nn.ReLU(),
+            nn.Dropout(0.2)
+        )
+
+        self.fc2 = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(0.2)
+        )
+
+        self.output = nn.Sequential(nn.Linear(512, 11))
 
     def forward(self, x):
-        x = self._hidden1(x)
-        x = self._hidden2(x)
-        x = self._hidden3(x)
-        x = self._hidden4(x)
-        x = self._hidden5(x)
-        x = self._hidden6(x)
-        x = self._hidden7(x)
-        x = self._hidden8(x)
-        x = x.view(x.size(0), 192 * 3 * 3)
-        x = self._hidden9(x)
-        x = self._hidden10(x)
-
-        output = self._output(x)
-
-        return output
-
-# ]]]]]]]]]]]]]]]]]
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        x = self.conv5(x)
+        x = self.conv6(x)
+        x = self.conv7(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.output(x)
+        return x

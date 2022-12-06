@@ -13,7 +13,7 @@ import torch.nn as nn
 
 
 # The MSER Algorithm
-def mser(image, delta=10, min_area=200, max_area=2000):
+def mser(image, filename, delta=10, min_area=200, max_area=2000):
 
     # make a copy of the image and convert it to grayscale
     image_ = np.copy(image)
@@ -58,7 +58,7 @@ def mser(image, delta=10, min_area=200, max_area=2000):
     plt.imshow(image_)
     plt.axis('off')
     # save the image
-    plt.savefig('mser.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{filename}_smer.png', bbox_inches='tight', pad_inches=0)
     plt.show()
     # ]]]]]]]]]]
 
