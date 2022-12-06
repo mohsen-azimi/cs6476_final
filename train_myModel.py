@@ -69,24 +69,12 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE, shu
 
 ###################### Model Loading ######################
 model = MyModel()
-model.to(device)
 file_name = 'my_model.pt'
 
 # print the file name
 print("Model name: ", file_name)
 
 
-# change the last layer to 10 classes
-NUM_CLASSES = 11  # 0-9, 10 for unknown/null
-IN_FEATURES = model.classifier[6].in_features  # get the number of features in the last layer
-# drop the last layer
-features = list(model.classifier.children())[:-1]
-# add the new layer
-features.extend([torch.nn.Linear(IN_FEATURES, NUM_CLASSES)])
-
-# put all the layers together
-model.classifier = torch.nn.Sequential(*features)  # just replaced the last layer to 11 classes
-# model.classifier[6] = torch.nn.Sequential(torch.nn.Linear(4096, NUM_CLASSES))
 
 # print the model
 print(model)
