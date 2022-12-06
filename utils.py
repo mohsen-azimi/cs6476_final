@@ -56,6 +56,9 @@ def mser(image, delta=10, min_area=200, max_area=2000):
     #     cv2.rectangle(image_, start_point, end_point, color, thickness)
 
     plt.imshow(image_)
+    plt.axis('off')
+    # save the image
+    plt.savefig('mser.png', bbox_inches='tight', pad_inches=0)
     plt.show()
     # ]]]]]]]]]]
 

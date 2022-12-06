@@ -126,6 +126,9 @@ def run_detection_and_classification(image):
             imgg = torch.transpose(imgg, 0, 1)
             print("shape of cropped image: ", imgg.shape)
             plt.imshow(imgg)
+            plt.axis('off')
+            # save the image
+            plt.savefig(f'smer_cropped_{len(best_roi_list)}.png', bbox_inches='tight', pad_inches=0)
             plt.show()
 
             croped_images.append(transform(torchvision.transforms.functional.to_pil_image(cropped_image)))
@@ -288,47 +291,47 @@ if __name__ == '__main__':
     cv2.imwrite('output_original.png', image)  # save the image with bounding boxes
     #
     #
-    # # 2. Change brightness
-    del image
-    image = np.copy(original_image)
-    image = (image * 0.9).clip(0, 255).astype(np.uint8)
-    run_detection_and_classification(image)  # detect and classify the numbers in the image
-    cv2.imwrite('output_brightness.png', image)  # save the image with bounding boxes
-    #
-    #
-    # # 3. add noise
-    del image
-    image = np.copy(original_image) + np.random.normal(0, 10, original_image.shape).astype(np.uint8) # add noise
-    image = np.clip(image, 0, 255).astype(np.uint8)
-    run_detection_and_classification(image)  # detect and classify the numbers in the image
-    cv2.imwrite('output_noise.png', image)  # save the image with bounding boxes
-    #
-    #
-    # # 4. scale  image
-    del image
-    image = np.copy(original_image)
-    image = cv2.resize(image, (0, 0), fx=1.3, fy=1.3)
-    run_detection_and_classification(image)  # detect and classify the numbers in the image
-    cv2.imwrite('output_scale.png', image)  # save the image with bounding boxes
-    #
-    #
-    #
-    # # 5. rotate image
+    # # # 2. Change brightness
     # del image
     # image = np.copy(original_image)
-    # image = cv2.rotate(image, cv2.ROTATE_180)
+    # image = (image * 0.9).clip(0, 255).astype(np.uint8)
     # run_detection_and_classification(image)  # detect and classify the numbers in the image
-    # cv2.imwrite('output_rotate.png', image)  # save the image with bounding boxes
+    # cv2.imwrite('output_brightness.png', image)  # save the image with bounding boxes
     # #
-    # # 6. move location
-    del image
-    image = np.copy(original_image)
-    image = cv2.warpAffine(image, np.float32([[1, 0, 10], [0, 1, 10]]), (image.shape[1], image.shape[0]))
-    run_detection_and_classification(image)  # detect and classify the numbers in the image
-    cv2.imwrite('output_move.png', image)  # save the image with bounding boxes
-    #
-    #
-    # # load video
-    # # cap = cv2.VideoCapture('test_video.mp4')
-    #
-    #
+    # #
+    # # # 3. add noise
+    # del image
+    # image = np.copy(original_image) + np.random.normal(0, 10, original_image.shape).astype(np.uint8) # add noise
+    # image = np.clip(image, 0, 255).astype(np.uint8)
+    # run_detection_and_classification(image)  # detect and classify the numbers in the image
+    # cv2.imwrite('output_noise.png', image)  # save the image with bounding boxes
+    # #
+    # #
+    # # # 4. scale  image
+    # del image
+    # image = np.copy(original_image)
+    # image = cv2.resize(image, (0, 0), fx=1.3, fy=1.3)
+    # run_detection_and_classification(image)  # detect and classify the numbers in the image
+    # cv2.imwrite('output_scale.png', image)  # save the image with bounding boxes
+    # #
+    # #
+    # #
+    # # # 5. rotate image
+    # # del image
+    # # image = np.copy(original_image)
+    # # image = cv2.rotate(image, cv2.ROTATE_180)
+    # # run_detection_and_classification(image)  # detect and classify the numbers in the image
+    # # cv2.imwrite('output_rotate.png', image)  # save the image with bounding boxes
+    # # #
+    # # # 6. move location
+    # del image
+    # image = np.copy(original_image)
+    # image = cv2.warpAffine(image, np.float32([[1, 0, 10], [0, 1, 10]]), (image.shape[1], image.shape[0]))
+    # run_detection_and_classification(image)  # detect and classify the numbers in the image
+    # cv2.imwrite('output_move.png', image)  # save the image with bounding boxes
+    # #
+    # #
+    # # # load video
+    # # # cap = cv2.VideoCapture('test_video.mp4')
+    # #
+    # #

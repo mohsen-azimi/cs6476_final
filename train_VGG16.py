@@ -59,7 +59,7 @@ print("Length of validation dataset: ", len(val_dataset))
 
 
 ## get the dataloader
-BATCH_SIZE = 128
+BATCH_SIZE = 1024
 NUM_WORKERS = 2
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
@@ -114,7 +114,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMEN
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
-NUM_EPOCHS = 25
+NUM_EPOCHS = 15
 
 # define the best accuracy and best model weights to save
 best_acc = 0.0
@@ -174,7 +174,7 @@ for epoch in range(NUM_EPOCHS):
 
 
         # print the loss and accuracy every 100 batches
-        if batch % 100 == 99:
+        if batch % 1000 == 999:
             print(f"Epoch: {epoch+1}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
 
         # del the variables to save memory
@@ -243,9 +243,9 @@ for epoch in range(NUM_EPOCHS):
             break
 
 
-# save the training history to pandas dataframe
-train_history = pd.DataFrame({'train_loss': train_loss_list, 'train_acc': train_acc_list, 'val_loss': val_loss_list, 'val_acc': val_acc_list})
-train_history.to_csv("train_history.csv", index=False)
+    # save the training history to pandas dataframe
+    train_history = pd.DataFrame({'train_loss': train_loss_list, 'train_acc': train_acc_list, 'val_loss': val_loss_list, 'val_acc': val_acc_list})
+    train_history.to_csv("train_history.csv", index=False)
 
 
 
