@@ -16,8 +16,6 @@ from models import MyModel
 
 ## Define the folders to load the dataset/save the model
 DIR_dataset = './dataset'
-# DIR_model = './model'
-# DIR_output = './output'
 
 ## get the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -43,7 +41,6 @@ svhn_test_set = torchvision.datasets.SVHN(root=DIR_dataset, split='test', downlo
 
 # combine train and extra as train dataset
 combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, svhn_test_set])
-
 
 
 ## split the train dataset into train and validation dataset
@@ -74,8 +71,6 @@ file_name = 'my_model.pt'
 # print the file name
 print("Model name: ", file_name)
 
-
-
 # print the model
 print(model)
 
@@ -90,8 +85,6 @@ LEARNING_RATE = 0.001
 MOMENTUM = 0.9
 optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
 
-# define the scheduler
-# scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
 NUM_EPOCHS = 15
@@ -110,8 +103,6 @@ val_acc_list = torch.zeros(NUM_EPOCHS)
 for epoch in range(NUM_EPOCHS):
     print("---------------------")
 
-    # # set the model to train mode
-    # model.train()
 
     # define train and val loss and accuracy
     batch_train_loss = 0.0
@@ -123,12 +114,11 @@ for epoch in range(NUM_EPOCHS):
     # iterate over the data
     for batch, data_sample in enumerate(train_loader, 0):
 
-        # first, get the inputs and labels and send them to device(GPU)
+        # first, get the inputs and labels
         inputs, labels = data_sample
         inputs = inputs.to(device)
         labels = labels.to(device)
 
-        # require the gradient for the inputs
         inputs.requires_grad = True
 
         # zero the parameter gradients
@@ -147,29 +137,27 @@ for epoch in range(NUM_EPOCHS):
         # optimize
         optimizer.step()
 
-        # statistics for loss and accuracy
-        # [[[[[[[[[[[[[[[[[
-        batch_train_loss += loss.item() # * inputs.size(0)
+        batch_train_loss += loss.item()
         batch_train_acc += torch.sum(preds == labels.data)
 
 
-        # print the loss and accuracy every 100 batches
-        if batch % 100 == 99:
+        # print the loss and accuracy
+        if batch % 10 == 9:
             print(f"Epoch: {epoch+1}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
 
-        # del the variables to save memory
-        del inputs, labels, outputs, preds, loss
+        # clear the memory
+        del inputs, outputs, labels,  preds, loss
         torch.cuda.empty_cache()
 
-    # calculate the epoch loss and accuracy
+    #  epoch loss & accuracy
     epoch_train_loss = batch_train_loss / len(train_dataset)
     epoch_train_acc = batch_train_acc.double() / len(train_dataset)
 
-    # calculate the validation loss and accuracy
+    # validation loss and accuracy
     model.eval()
     with torch.no_grad():
         for batch, data_sample in enumerate(val_loader, 0):
-            # first, get the inputs and labels and send them to device(GPU)
+            # first, get the inputs
             inputs, labels = data_sample
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -183,11 +171,11 @@ for epoch in range(NUM_EPOCHS):
             loss = criterion(outputs, labels)
 
             # statistics for loss and accuracy
-            batch_val_loss += loss.item() # * inputs.size(0)
+            batch_val_loss += loss.item()    # Do we need this for validation? not for validation
             batch_val_acc += torch.sum(preds == labels.data)
 
-            # del the variables to save memory
-            del inputs, labels, outputs, preds, loss
+            # clear the variables
+            del inputs,  outputs, labels, preds, loss
             torch.cuda.empty_cache()
 
     epoch_val_loss = batch_val_loss / len(val_dataset)
@@ -210,7 +198,6 @@ for epoch in range(NUM_EPOCHS):
     # save the best model
     if epoch_val_acc > best_acc:
         best_acc = epoch_val_acc
-        # best_model_wts = copy.deepcopy(model.state_dict())
 
         # save the model
         torch.save(model.state_dict(), f'{file_name}_state_dict.pt')

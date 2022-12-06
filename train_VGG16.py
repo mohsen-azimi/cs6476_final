@@ -4,9 +4,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 import numpy as np
-# import matplotlib.pyplot as plt
-# import os
-# import cv2
+
 import copy
 import pandas as pd
 import PIL
@@ -15,8 +13,6 @@ import PIL
 
 ## Define the folders to load the dataset/save the model
 DIR_dataset = './dataset'
-# DIR_model = './model'
-# DIR_output = './output'
 
 ## get the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,7 +38,6 @@ svhn_test_set = torchvision.datasets.SVHN(root=DIR_dataset, split='test', downlo
 
 # combine train and extra as train dataset
 combined_dataset = torch.utils.data.ConcatDataset([svhn_train_set, svhn_extra_set, svhn_test_set])
-
 
 
 ## split the train dataset into train and validation dataset
@@ -110,8 +105,6 @@ LEARNING_RATE = 0.001
 MOMENTUM = 0.9
 optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
 
-# define the scheduler
-# scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 # define the number of epochs
 NUM_EPOCHS = 15
@@ -168,20 +161,20 @@ for epoch in range(NUM_EPOCHS):
         optimizer.step()
 
         # statistics for loss and accuracy
-        # [[[[[[[[[[[[[[[[[
-        batch_train_loss += loss.item() # * inputs.size(0)
+
+        batch_train_loss += loss.item()
         batch_train_acc += torch.sum(preds == labels.data)
 
 
-        # print the loss and accuracy every 100 batches
-        if batch % 1000 == 999:
-            print(f"Epoch: {epoch+1}, Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
+        # print the loss and accuracy to see the progress of the training process
+        if batch % 10 == 9:
+            print(f"Epoch: {epoch+1},  Batch: {batch+1}, Loss: {loss.item():.4f}, Accuracy: {torch.sum(preds == labels.data).item()/BATCH_SIZE:.4f}")
 
-        # del the variables to save memory
-        del inputs, labels, outputs, preds, loss
+        # clear the vars from the memory to speed up the training
+        del inputs,  outputs, labels, preds, loss
         torch.cuda.empty_cache()
 
-    # calculate the epoch loss and accuracy
+    # calculate the epoch loss and accuracy for train and validation dataset and save them to the lists for plotting the graph later
     epoch_train_loss = batch_train_loss / len(train_dataset)
     epoch_train_acc = batch_train_acc.double() / len(train_dataset)
 
@@ -189,8 +182,10 @@ for epoch in range(NUM_EPOCHS):
     model.eval()
     with torch.no_grad():
         for batch, data_sample in enumerate(val_loader, 0):
-            # first, get the inputs and labels and send them to device(GPU)
+            # first, get the inputs and labels
             inputs, labels = data_sample
+
+            # send them to device(GPU)
             inputs = inputs.to(device)
             labels = labels.to(device)
 
@@ -202,12 +197,12 @@ for epoch in range(NUM_EPOCHS):
 
             loss = criterion(outputs, labels)
 
-            # statistics for loss and accuracy
-            batch_val_loss += loss.item() # * inputs.size(0)
+            # get the results
+            batch_val_loss += loss.item()
             batch_val_acc += torch.sum(preds == labels.data)
 
-            # del the variables to save memory
-            del inputs, labels, outputs, preds, loss
+            # clear the vars from the memory to speed up the training and validation process for the next epoch
+            del inputs, outputs, labels,  preds, loss
             torch.cuda.empty_cache()
 
     epoch_val_loss = batch_val_loss / len(val_dataset)
@@ -221,16 +216,12 @@ for epoch in range(NUM_EPOCHS):
 
 
 
-
-
-
     # print the loss and accuracy for each epoch
     print(f"Epoch: {epoch+1}, Train Loss: {epoch_train_loss:.4f}, Train Accuracy: {epoch_train_acc:.4f}, Val Loss: {epoch_val_loss:.4f}, Val Accuracy: {epoch_val_acc:.4f}")
 
-    # save the best model
+    # save the best model weights to the file to use it later for testing
     if epoch_val_acc > best_acc:
         best_acc = epoch_val_acc
-        # best_model_wts = copy.deepcopy(model.state_dict())
 
         # save the model
         torch.save(model.state_dict(), f'{file_name}_state_dict.pt')
