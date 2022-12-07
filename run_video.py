@@ -262,6 +262,7 @@ if __name__ == '__main__':
 
 
     # output video file
+    # same mp4 format
     out = cv2.VideoWriter(f'output_video_{model_arch}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
 
     # read the video frame by frame

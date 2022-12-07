@@ -1,3 +1,4 @@
+import os
 
 import torch
 import torchvision
@@ -244,6 +245,11 @@ def run_detection_and_classification(image, filename):
 # if main, run the code
 if __name__ == '__main__':
     print("Running main")
+
+    # create a folder if it does not exist
+    if not os.path.exists("graded_images"):
+        os.makedirs("graded_images")
+
     original_image = cv2.imread('test_image.png')
     image = np.copy(original_image)
 
@@ -252,6 +258,7 @@ if __name__ == '__main__':
     print(f"------------\n filename: {filename} \n")
     image = np.copy(original_image)
     cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
+    cv2.imwrite('graded_images/0.png', image)  # save the image with bounding boxes
 
     run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
     cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
@@ -266,6 +273,7 @@ if __name__ == '__main__':
 
     run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
     cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    cv2.imwrite('graded_images/4.png', image)  # save the image with bounding boxes
     # #
     # #
     # # # 3. add noise
@@ -277,6 +285,7 @@ if __name__ == '__main__':
 
     run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
     cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    cv2.imwrite('graded_images/5.png', image)  # save the image with bounding boxes
     # #
     # #
     del image
@@ -303,6 +312,8 @@ if __name__ == '__main__':
 
     run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
     cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    cv2.imwrite('graded_images/1.png', image)  # save the image with bounding boxes
+
     # # #
     # # #
     # # #
@@ -316,6 +327,8 @@ if __name__ == '__main__':
 
     run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
     cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    cv2.imwrite('graded_images/2.png', image)  # save the image with bounding boxes
+
     # # # #
 
     # # 5. rotate image 20 degrees
@@ -328,9 +341,15 @@ if __name__ == '__main__':
     cv2.imwrite(f'{filename}_input.png', image)  # save the image with bounding boxes
     run_detection_and_classification(image, filename)  # detect and classify the numbers in the image
     cv2.imwrite(f'{filename}_output.png', image)  # save the image with bounding boxes
+    cv2.imwrite(f'graded_images/3.png', image)  # save the image with bounding boxes
     # # #
     # # #
     # # # # load video
     # # # # cap = cv2.VideoCapture('test_video.mp4')
     # # #
     # # #
+
+    # create a folder "graded_images"
+
+
+
